@@ -1,0 +1,829 @@
+{% extends "base.html" %}
+
+{% block title %}Regime Performance Analytics{% endblock %}
+
+{% block styles %}
+<style>
+  .performance-card {
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .performance-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .high-performer {
+    border-left: 4px solid #00d084;
+  }
+  
+  .outlier-performer {
+    border-left: 4px solid #f6e05e;
+  }
+  
+  .regime-tag {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+  }
+  
+  .tag-strong-uptrend {
+    background-color: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+  }
+  
+  .tag-strong-downtrend {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+  
+  .tag-ranging {
+    background-color: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+  }
+  
+  .tag-high-volatility {
+    background-color: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+  }
+  
+  .tag-transition {
+    background-color: rgba(139, 92, 246, 0.2);
+    color: #8b5cf6;
+  }
+  
+  .performance-metric {
+    text-align: center;
+    padding: 10px;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .performance-metric h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0;
+    font-weight: 700;
+  }
+  
+  .performance-metric p {
+    margin-top: 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .positive-value {
+    color: #10b981;
+  }
+  
+  .negative-value {
+    color: #ef4444;
+  }
+  
+  .playbook-card {
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+  }
+  
+  .playbook-card.auto-generated {
+    border-left: 4px solid #3b82f6;
+  }
+  
+  .playbook-card.user-created {
+    border-left: 4px solid #8b5cf6;
+  }
+  
+  .playbook-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+  
+  .playbook-header {
+    padding: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .playbook-body {
+    padding: 15px;
+  }
+  
+  .playbook-strategy-section {
+    margin-bottom: 15px;
+  }
+  
+  .playbook-strategy-section h5 {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 5px;
+  }
+  
+  .playbook-strategy-section p {
+    font-size: 0.95rem;
+    margin: 0;
+    white-space: pre-line;
+  }
+  
+  .playbook-footer {
+    padding: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .param-tag {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-right: 5px;
+    display: inline-block;
+    margin-bottom: 5px;
+  }
+  
+  .star-rating {
+    color: #f59e0b;
+    font-size: 1.2rem;
+  }
+  
+  .performance-row:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+  
+  .confidence-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  
+  .market-phase-badge {
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    display: inline-block;
+  }
+  
+  .pattern-score-bar {
+    height: 5px;
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin-top: 5px;
+    overflow: hidden;
+  }
+  
+  .pattern-score-fill {
+    height: 100%;
+    background: linear-gradient(to right, #3b82f6, #10b981);
+  }
+  
+  .timeline-container {
+    position: relative;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    height: 120px;
+  }
+  
+  #regime-timeline-chart {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .tab-pane {
+    padding-top: 15px;
+  }
+  
+  .nav-tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .nav-tabs .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    border: none;
+    border-bottom: 3px solid transparent;
+  }
+  
+  .nav-tabs .nav-link:hover {
+    border-color: transparent;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .nav-tabs .nav-link.active {
+    color: #3b82f6;
+    background-color: transparent;
+    border-bottom-color: #3b82f6;
+  }
+  
+  .insight-tip {
+    border-left: 3px solid #f59e0b;
+    padding: 10px 15px;
+    background-color: rgba(245, 158, 11, 0.1);
+    border-radius: 0 5px 5px 0;
+    margin-bottom: 20px;
+  }
+  
+  .insight-tip h5 {
+    color: #f59e0b;
+    margin-bottom: 5px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <h2>Regime Performance Analytics</h2>
+      <p class="text-muted">Advanced pattern recognition and trading playbook generation</p>
+    </div>
+    <div class="col-md-6 text-end">
+      <div class="btn-group" role="group">
+        <button type="button" class="btn btn-outline-primary" id="refresh-performance-data">
+          <i class="fas fa-sync-alt"></i> Refresh Data
+        </button>
+        <button type="button" class="btn btn-outline-success" id="create-playbook-btn" data-bs-toggle="modal" data-bs-target="#createPlaybookModal">
+          <i class="fas fa-plus"></i> New Playbook
+        </button>
+        <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#telegramSettingsModal">
+          <i class="fas fa-bell"></i> Alert Settings
+        </button>
+        <div class="btn-group" role="group">
+          <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+            Export
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" id="export-performance-csv">Export Performance Data (CSV)</a></li>
+            <li><a class="dropdown-item" href="#" id="export-playbooks-json">Export Playbooks (JSON)</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="row mb-4">
+    <div class="col-12">
+      <ul class="nav nav-tabs" id="performance-tabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics-pane" type="button" role="tab" aria-controls="analytics-pane" aria-selected="true">
+            <i class="fas fa-chart-line"></i> Performance Analytics
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="playbooks-tab" data-bs-toggle="tab" data-bs-target="#playbooks-pane" type="button" role="tab" aria-controls="playbooks-pane" aria-selected="false">
+            <i class="fas fa-book"></i> Regime Playbooks
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="live-insights-tab" data-bs-toggle="tab" data-bs-target="#live-insights-pane" type="button" role="tab" aria-controls="live-insights-pane" aria-selected="false">
+            <i class="fas fa-lightbulb"></i> Live Insights
+          </button>
+        </li>
+      </ul>
+      
+      <div class="tab-content" id="performance-tab-content">
+        <!-- Performance Analytics Tab -->
+        <div class="tab-pane fade show active" id="analytics-pane" role="tabpanel" aria-labelledby="analytics-tab">
+          <!-- Top Performance Stats -->
+          <div class="row mb-4">
+            <div class="col-md-3">
+              <div class="performance-metric">
+                <h3 id="total-regimes-count">--</h3>
+                <p>Total Regimes Tracked</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="performance-metric">
+                <h3 id="high-performer-count">--</h3>
+                <p>High Performers</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="performance-metric">
+                <h3 id="best-regime-roi" class="positive-value">--</h3>
+                <p>Best Regime ROI</p>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="performance-metric">
+                <h3 id="avg-regime-confidence">--</h3>
+                <p>Avg Regime Confidence</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Regime Performance Timeline -->
+          <div class="card performance-card mb-4">
+            <div class="card-header bg-transparent">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Regime Performance Timeline</h5>
+                <div class="btn-group btn-group-sm">
+                  <button type="button" class="btn btn-outline-secondary" id="timelineZoomOut">
+                    <i class="fas fa-search-minus"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" id="timelineReset">
+                    <i class="fas fa-home"></i>
+                  </button>
+                  <button type="button" class="btn btn-outline-secondary" id="timelineZoomIn">
+                    <i class="fas fa-search-plus"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="timeline-container">
+                <canvas id="regime-timeline-chart"></canvas>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Top Performing Regimes -->
+          <div class="card performance-card mb-4">
+            <div class="card-header bg-transparent">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Top Performing Regimes</h5>
+                <div>
+                  <select class="form-select form-select-sm" id="regime-filter">
+                    <option value="">All Regime Types</option>
+                    <option value="Strong Uptrend">Strong Uptrend</option>
+                    <option value="Strong Downtrend">Strong Downtrend</option>
+                    <option value="Ranging">Ranging</option>
+                    <option value="High Volatility">High Volatility</option>
+                    <option value="Transition">Transition</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Regime Type</th>
+                      <th>Confidence</th>
+                      <th>ROI</th>
+                      <th>Win Rate</th>
+                      <th>Market Phase</th>
+                      <th>Pattern Score</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="top-performers-table">
+                    <tr>
+                      <td colspan="7" class="text-center">Loading data...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <div class="card-footer bg-transparent">
+              <nav aria-label="Regime performance pagination">
+                <ul class="pagination justify-content-center mb-0" id="performance-pagination">
+                  <!-- Pagination will be added here by JavaScript -->
+                </ul>
+              </nav>
+            </div>
+          </div>
+          
+          <!-- Performance Insights -->
+          <div class="card performance-card">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0">Performance Insights</h5>
+            </div>
+            <div class="card-body">
+              <div class="insight-tip">
+                <h5><i class="fas fa-lightbulb"></i> Pattern Recognition</h5>
+                <p>
+                  The system automatically identifies patterns in high-performing regimes. 
+                  Look for regime types with high pattern scores and consistent performance.
+                  These are prime candidates for playbook generation.
+                </p>
+              </div>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Regime Comparison</h5>
+                      <canvas id="regime-comparison-chart"></canvas>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Confidence vs Performance</h5>
+                      <canvas id="confidence-performance-chart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Playbooks Tab -->
+        <div class="tab-pane fade" id="playbooks-pane" role="tabpanel" aria-labelledby="playbooks-tab">
+          <!-- Playbook Management Controls -->
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <div class="input-group">
+                <span class="input-group-text">Filter</span>
+                <input type="text" class="form-control" id="playbook-search" placeholder="Search playbooks...">
+                <button class="btn btn-outline-secondary" type="button" id="clear-search">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="show-active-only" checked>
+                <label class="form-check-label" for="show-active-only">Show Active Only</label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Playbooks List -->
+          <div class="row" id="playbooks-container">
+            <div class="col-12 text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="mt-2">Loading playbooks...</p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Live Insights Tab -->
+        <div class="tab-pane fade" id="live-insights-pane" role="tabpanel" aria-labelledby="live-insights-tab">
+          <!-- Current Regime Status -->
+          <div class="row mb-4">
+            <div class="col-md-6">
+              <div class="card performance-card">
+                <div class="card-header bg-transparent">
+                  <h5 class="mb-0">Current Regime Status</h5>
+                </div>
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="me-3">
+                      <div id="current-regime-confidence" class="confidence-badge">--</div>
+                    </div>
+                    <div>
+                      <h4 id="current-regime-type">--</h4>
+                      <p class="text-muted mb-0">Since <span id="current-regime-start">--</span></p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-6">
+                      <h6>Duration</h6>
+                      <p id="current-regime-duration">--</p>
+                    </div>
+                    <div class="col-6">
+                      <h6>Market Phase</h6>
+                      <p id="current-regime-phase">--</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card performance-card">
+                <div class="card-header bg-transparent">
+                  <h5 class="mb-0">Matching Playbooks</h5>
+                </div>
+                <div class="card-body">
+                  <div id="matching-playbooks">
+                    <p class="text-muted text-center">No matching playbooks found.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Pattern Recognition Insights -->
+          <div class="card performance-card mb-4">
+            <div class="card-header bg-transparent">
+              <h5 class="mb-0">Pattern Recognition Insights</h5>
+            </div>
+            <div class="card-body">
+              <div id="pattern-insights">
+                <div class="alert alert-info">
+                  <i class="fas fa-info-circle"></i> The system is gathering pattern data. Insights will be available once enough regime data has been collected.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create Playbook Modal -->
+<div class="modal fade" id="createPlaybookModal" tabindex="-1" aria-labelledby="createPlaybookModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="createPlaybookModalLabel">Create New Playbook</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="create-playbook-form">
+          <div class="mb-3">
+            <label for="playbook-name" class="form-label">Playbook Name</label>
+            <input type="text" class="form-control" id="playbook-name" placeholder="Enter a descriptive name..." required>
+          </div>
+          <div class="mb-3">
+            <label for="playbook-regime-type" class="form-label">Regime Type</label>
+            <select class="form-select" id="playbook-regime-type" required>
+              <option value="">Select a regime type</option>
+              <option value="Strong Uptrend">Strong Uptrend</option>
+              <option value="Strong Downtrend">Strong Downtrend</option>
+              <option value="Ranging">Ranging</option>
+              <option value="High Volatility">High Volatility</option>
+              <option value="Transition">Transition</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="playbook-description" class="form-label">Description</label>
+            <textarea class="form-control" id="playbook-description" rows="2" placeholder="Describe your playbook strategy..."></textarea>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="playbook-entry-conditions" class="form-label">Entry Conditions</label>
+                <textarea class="form-control" id="playbook-entry-conditions" rows="5" placeholder="Describe entry conditions..." required></textarea>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="playbook-exit-conditions" class="form-label">Exit Conditions</label>
+                <textarea class="form-control" id="playbook-exit-conditions" rows="5" placeholder="Describe exit conditions..." required></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="playbook-stop-loss" class="form-label">Stop Loss Strategy</label>
+                <textarea class="form-control" id="playbook-stop-loss" rows="3" placeholder="Describe stop loss strategy..."></textarea>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="playbook-take-profit" class="form-label">Take Profit Strategy</label>
+                <textarea class="form-control" id="playbook-take-profit" rows="3" placeholder="Describe take profit strategy..."></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="playbook-position-sizing" class="form-label">Position Sizing</label>
+                <input type="text" class="form-control" id="playbook-position-sizing" placeholder="e.g., 50% of standard position size">
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="playbook-confidence-threshold" class="form-label">Confidence Threshold</label>
+                <div class="input-group">
+                  <input type="range" class="form-range" id="playbook-confidence-threshold" min="50" max="95" value="75">
+                  <span class="input-group-text" id="confidence-value">75%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="save-playbook-btn">Save Playbook</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- View Performance Details Modal -->
+<div class="modal fade" id="performanceDetailsModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="performance-details-title">Regime Performance Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="performance-details-body">
+        <!-- Content will be dynamically added here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="create-playbook-from-performance">Create Playbook</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Playbook Detail Modal -->
+<div class="modal fade" id="playbookDetailModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="playbook-detail-title">Playbook Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="playbook-detail-body">
+        <!-- Content will be dynamically added here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success" id="apply-playbook-btn">Apply Playbook</button>
+        <button type="button" class="btn btn-primary" id="edit-playbook-btn">Edit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Telegram Alert Settings Modal -->
+<div class="modal fade" id="telegramSettingsModal" tabindex="-1" aria-labelledby="telegramSettingsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="telegramSettingsModalLabel">Telegram Alert Settings</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Main toggle -->
+        <div class="form-check form-switch mb-4">
+          <input class="form-check-input" type="checkbox" id="telegram-alerts-toggle">
+          <label class="form-check-label" for="telegram-alerts-toggle">Enable Telegram Alerts</label>
+        </div>
+        
+        <!-- Alert Types Section -->
+        <div class="telegram-settings-section card performance-card mb-4">
+          <div class="card-header bg-transparent">
+            <h5 class="mb-0">Alert Types</h5>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="regime-change-alerts">
+                  <label class="form-check-label" for="regime-change-alerts">Regime Change Alerts</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="top-performer-alerts">
+                  <label class="form-check-label" for="top-performer-alerts">Top Performer Alerts</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="confidence-threshold-alerts">
+                  <label class="form-check-label" for="confidence-threshold-alerts">Confidence Threshold Alerts</label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="playbook-match-alerts">
+                  <label class="form-check-label" for="playbook-match-alerts">Playbook Match Alerts</label>
+                </div>
+                <div class="form-check form-switch mb-3">
+                  <input class="form-check-input" type="checkbox" id="trade-execution-alerts">
+                  <label class="form-check-label" for="trade-execution-alerts">Trade Execution Alerts</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Thresholds Section -->
+        <div class="telegram-settings-section card performance-card mb-4">
+          <div class="card-header bg-transparent">
+            <h5 class="mb-0">Alert Thresholds</h5>
+          </div>
+          <div class="card-body">
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label for="confidence-threshold-slider" class="form-label d-flex justify-content-between">
+                  <span>Confidence Threshold</span>
+                  <span id="confidence-threshold-value">80%</span>
+                </label>
+                <input type="range" class="form-range" min="50" max="100" step="1" id="confidence-threshold-slider">
+                <small class="text-muted">Only send regime alerts when confidence exceeds this threshold</small>
+              </div>
+              <div class="col-md-6">
+                <label for="roi-threshold-slider" class="form-label d-flex justify-content-between">
+                  <span>ROI Threshold</span>
+                  <span id="roi-threshold-value">1.5%</span>
+                </label>
+                <input type="range" class="form-range" min="0" max="10" step="0.1" id="roi-threshold-slider">
+                <small class="text-muted">Only alert on top performers with ROI above this threshold</small>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6">
+                <label for="win-rate-threshold-slider" class="form-label d-flex justify-content-between">
+                  <span>Win Rate Threshold</span>
+                  <span id="win-rate-threshold-value">60%</span>
+                </label>
+                <input type="range" class="form-range" min="0" max="100" step="5" id="win-rate-threshold-slider">
+                <small class="text-muted">Minimum win rate for top performer alerts</small>
+              </div>
+              <div class="col-md-6">
+                <label for="playbook-match-confidence-slider" class="form-label d-flex justify-content-between">
+                  <span>Playbook Match Confidence</span>
+                  <span id="playbook-match-confidence-value">75%</span>
+                </label>
+                <input type="range" class="form-range" min="50" max="100" step="1" id="playbook-match-confidence-slider">
+                <small class="text-muted">Minimum confidence for playbook match alerts</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mute Settings Section -->
+        <div class="telegram-settings-section card performance-card mb-4">
+          <div class="card-header bg-transparent">
+            <h5 class="mb-0">Quiet Hours</h5>
+          </div>
+          <div class="card-body">
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="mute-alerts-toggle">
+              <label class="form-check-label" for="mute-alerts-toggle">Enable Quiet Hours</label>
+            </div>
+            
+            <div class="row mb-4">
+              <div class="col-md-6">
+                <label for="mute-start-time" class="form-label">Start Time</label>
+                <input type="time" class="form-control" id="mute-start-time">
+              </div>
+              <div class="col-md-6">
+                <label for="mute-end-time" class="form-label">End Time</label>
+                <input type="time" class="form-control" id="mute-end-time">
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label class="form-label">Mute on Selected Days</label>
+              <div class="d-flex flex-wrap gap-2">
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-monday">
+                  <label class="form-check-label" for="mute-monday">Mon</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-tuesday">
+                  <label class="form-check-label" for="mute-tuesday">Tue</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-wednesday">
+                  <label class="form-check-label" for="mute-wednesday">Wed</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-thursday">
+                  <label class="form-check-label" for="mute-thursday">Thu</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-friday">
+                  <label class="form-check-label" for="mute-friday">Fri</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-saturday">
+                  <label class="form-check-label" for="mute-saturday">Sat</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input class="form-check-input" type="checkbox" id="mute-sunday">
+                  <label class="form-check-label" for="mute-sunday">Sun</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" id="reset-telegram-settings">Reset to Defaults</button>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Save Settings</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Performance dashboard module dependencies -->
+<script src="{{ url_for('static', filename='js/performance_core.js') }}"></script>
+<script src="{{ url_for('static', filename='js/performance_api.js') }}"></script>
+<script src="{{ url_for('static', filename='js/performance_render.js') }}"></script>
+<script src="{{ url_for('static', filename='js/telegram_alerts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/telegram_settings.js') }}"></script>
+
+<!-- Main performance module -->
+<script src="{{ url_for('static', filename='js/performance.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,15 @@
+[Unit]
+Description=Trading Bot Service
+After=network.target
+
+[Service]
+Type=simple
+User=behar
+WorkingDirectory=/home/behar/CascadeProjects/SuperTrend/Inside=Bar:Strategy
+ExecStart=/home/behar/CascadeProjects/SuperTrend/venv/bin/python run_bot_daemon.py -d
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
