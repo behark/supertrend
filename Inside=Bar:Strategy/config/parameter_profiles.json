@@ -1,0 +1,77 @@
+{
+  "default": {
+    "name": "Default",
+    "description": "Standard balanced settings",
+    "parameters": {
+      "confidence_threshold": 95.0,
+      "max_signals_per_day": 10,
+      "max_trades_per_day": 5,
+      "position_size_percent": 25.0,
+      "supertrend_adx_weight": 60,
+      "inside_bar_weight": 40
+    }
+  },
+  "conservative": {
+    "name": "Conservative",
+    "description": "Lower risk settings for volatile markets",
+    "parameters": {
+      "confidence_threshold": 97.0,
+      "max_signals_per_day": 5,
+      "max_trades_per_day": 3,
+      "position_size_percent": 15.0,
+      "supertrend_adx_weight": 70,
+      "inside_bar_weight": 30
+    }
+  },
+  "aggressive": {
+    "name": "Aggressive",
+    "description": "Higher risk settings for trending markets",
+    "parameters": {
+      "confidence_threshold": 90.0,
+      "max_signals_per_day": 15,
+      "max_trades_per_day": 8,
+      "position_size_percent": 40.0,
+      "supertrend_adx_weight": 50,
+      "inside_bar_weight": 50
+    }
+  },
+  "defensive": {
+    "name": "Defensive",
+    "description": "Minimal trading during strong downtrends or high risk conditions",
+    "parameters": {
+      "confidence_threshold": 98.0,
+      "max_signals_per_day": 3,
+      "max_trades_per_day": 2,
+      "position_size_percent": 10.0,
+      "supertrend_adx_weight": 75,
+      "inside_bar_weight": 25
+    },
+    "created": "2025-07-29T07:42:43.026626"
+  },
+  "hyper_aggressive": {
+    "name": "Hyper Aggressive",
+    "description": "Maximized trading during low volatility strong trends",
+    "parameters": {
+      "confidence_threshold": 80.0,
+      "max_signals_per_day": 30,
+      "max_trades_per_day": 20,
+      "position_size_percent": 20.0,
+      "supertrend_adx_weight": 50,
+      "inside_bar_weight": 50
+    },
+    "created": "2025-07-29T07:42:43.027337"
+  },
+  "reversal_hunter": {
+    "name": "Reversal Hunter",
+    "description": "Optimized for catching market reversals with divergence signals",
+    "parameters": {
+      "confidence_threshold": 85.0,
+      "max_signals_per_day": 8,
+      "max_trades_per_day": 5,
+      "position_size_percent": 15.0,
+      "supertrend_adx_weight": 40,
+      "inside_bar_weight": 60
+    },
+    "created": "2025-07-29T07:42:43.028042"
+  }
+}

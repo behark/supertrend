@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Trading Bot Dashboard - Trades History{% endblock %}
+
+{% block extra_css %}
+<style>
+    .trade-profit {
+        font-weight: bold;
+    }
+
+    .trade-profit.profit {
+        color: #28a745;
+    }
+
+    .trade-profit.loss {
+        color: #dc3545;
+    }
+    
+    .trade-badge {
+        padding: 5px 10px;
+        border-radius: 4px;
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    .trade-badge.LONG {
+        background-color: rgba(40, 167, 69, 0.2);
+        color: #1e7e34;
+    }
+    
+    .trade-badge.SHORT {
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #b21f2d;
+    }
+    
+    .trade-strategy {
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.75rem;
+        background-color: rgba(13, 110, 253, 0.1);
+        color: #0d6efd;
+    }
+    
+    .filter-badge {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 20px;
+        padding: 0.35rem 0.75rem;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+        display: inline-flex;
+        align-items: center;
+        font-size: 0.85rem;
+    }
+    
+    .filter-badge .close {
+        margin-left: 0.5rem;
+        font-size: 1rem;
+        line-height: 0;
+        cursor: pointer;
+    }
+    
+    .trade-details-row {
+        background-color: rgba(0, 0, 0, 0.02);
+        border-left: 3px solid #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Trade History</h5>
+                <div>
+                    <button class="btn btn-sm btn-light me-2" id="refresh-trades-btn">
+                        <i class="bi bi-arrow-repeat"></i> Refresh
+                    </button>
+                    <button class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bi bi-download"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-muted mb-2">Total Trades</h6>
+                                <h2 id="total-trades-count">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-muted mb-2">Win Rate</h6>
+                                <h2 id="win-rate">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-muted mb-2">Total Profit</h6>
+                                <h2 id="total-profit">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <h6 class="card-title text-muted mb-2">Avg Trade</h6>
+                                <h2 id="avg-profit">--</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="trade-performance-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Filters -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">Filter Trades</h6>
+                                <button class="btn btn-sm btn-outline-secondary" id="clear-filters-btn">Clear Filters</button>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Date Range</label>
+                                        <select class="form-select" id="date-range-filter">
+                                            <option value="all" selected>All Time</option>
+                                            <option value="today">Today</option>
+                                            <option value="week">This Week</option>
+                                            <option value="month">This Month</option>
+                                            <option value="custom">Custom Range</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Symbol</label>
+                                        <select class="form-select" id="symbol-filter">
+                                            <option value="all" selected>All Symbols</option>
+                                            <!-- Filled by JavaScript -->
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Direction</label>
+                                        <select class="form-select" id="direction-filter">
+                                            <option value="all" selected>All</option>
+                                            <option value="LONG">Long</option>
+                                            <option value="SHORT">Short</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Strategy</label>
+                                        <select class="form-select" id="strategy-filter">
+                                            <option value="all" selected>All Strategies</option>
+                                            <option value="supertrend_adx">SuperTrend+ADX</option>
+                                            <option value="inside_bar">Inside Bar</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="row" id="custom-date-range" style="display: none;">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Start Date</label>
+                                        <input type="date" class="form-control" id="start-date-filter">
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">End Date</label>
+                                        <input type="date" class="form-control" id="end-date-filter">
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Result</label>
+                                        <select class="form-select" id="result-filter">
+                                            <option value="all" selected>All</option>
+                                            <option value="win">Winners</option>
+                                            <option value="loss">Losers</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 mb-3">
+                                        <label class="form-label">Exit Type</label>
+                                        <select class="form-select" id="exit-type-filter">
+                                            <option value="all" selected>All</option>
+                                            <option value="TP">Take Profit</option>
+                                            <option value="SL">Stop Loss</option>
+                                            <option value="manual">Manual</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3 d-flex align-items-end">
+                                        <button class="btn btn-primary" id="apply-filters-btn">
+                                            <i class="bi bi-funnel"></i> Apply Filters
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div id="active-filters" class="mt-3" style="display: none;">
+                                    <h6 class="mb-2">Active Filters:</h6>
+                                    <div id="filter-badges"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Trade Table -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="trades-table">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>ID</th>
+                                        <th>Date</th>
+                                        <th>Symbol</th>
+                                        <th>Direction</th>
+                                        <th>Entry Price</th>
+                                        <th>Exit Price</th>
+                                        <th>P/L</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="no-trades-message" class="alert alert-info text-center" style="display: none;">
+                            No trades found matching the current filters.
+                        </div>
+                        
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div>
+                                <select class="form-select form-select-sm d-inline-block w-auto" id="page-size">
+                                    <option value="10" selected>10 per page</option>
+                                    <option value="25">25 per page</option>
+                                    <option value="50">50 per page</option>
+                                    <option value="100">100 per page</option>
+                                </select>
+                            </div>
+                            <nav aria-label="Trade history pagination">
+                                <ul class="pagination pagination-sm" id="pagination">
+                                    <!-- Filled by JavaScript -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trade Details Modal -->
+<div class="modal fade" id="tradeDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Trade Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 id="trade-id" class="mb-3">Trade #--</h5>
+                        <p><strong>Symbol:</strong> <span id="detail-symbol">--</span></p>
+                        <p><strong>Direction:</strong> <span id="detail-direction">--</span></p>
+                        <p><strong>Strategy:</strong> <span id="detail-strategy">--</span></p>
+                        <p><strong>Size:</strong> <span id="detail-size">--</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Results</h5>
+                        <p><strong>Entry Price:</strong> <span id="detail-entry-price">--</span></p>
+                        <p><strong>Exit Price:</strong> <span id="detail-exit-price">--</span></p>
+                        <p><strong>P/L:</strong> <span id="detail-pnl" class="trade-profit">--</span></p>
+                        <p><strong>P/L %:</strong> <span id="detail-pnl-percent" class="trade-profit">--</span></p>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Entry</h5>
+                        <p><strong>Entry Time:</strong> <span id="detail-entry-time">--</span></p>
+                        <p><strong>Signal Confidence:</strong> <span id="detail-confidence">--</span></p>
+                        <p><strong>Market Regime:</strong> <span id="detail-regime">--</span></p>
+                        <p><strong>Entry Note:</strong> <span id="detail-entry-note">--</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Exit</h5>
+                        <p><strong>Exit Time:</strong> <span id="detail-exit-time">--</span></p>
+                        <p><strong>Exit Type:</strong> <span id="detail-exit-type">--</span></p>
+                        <p><strong>Duration:</strong> <span id="detail-duration">--</span></p>
+                        <p><strong>Exit Note:</strong> <span id="detail-exit-note">--</span></p>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h5 class="mb-3">Orders</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm" id="detail-orders-table">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Type</th>
+                                        <th>Side</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Filled by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-3 pt-3 border-top">
+                    <div class="col-md-12">
+                        <div id="detail-notes">
+                            <!-- Filled by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Trade History</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Select export options:</p>
+                <div class="mb-3">
+                    <label class="form-label">Format</label>
+                    <select class="form-select" id="export-format">
+                        <option value="csv">CSV</option>
+                        <option value="json">JSON</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Time Range</label>
+                    <select class="form-select" id="export-range">
+                        <option value="all">All Time</option>
+                        <option value="filtered">Current Filtered Results</option>
+                        <option value="month">Last Month</option>
+                        <option value="quarter">Last Quarter</option>
+                        <option value="year">Last Year</option>
+                    </select>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="include-orders">
+                    <label class="form-check-label" for="include-orders">Include Order Details</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="export-btn">
+                    <i class="bi bi-download"></i> Export
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/trades.js') }}"></script>
+{% endblock %}

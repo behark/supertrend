@@ -1,0 +1,117 @@
+{
+    "strong_uptrend_low_volatility": {
+        "strategy": "supertrend_adx",
+        "leverage": 3,
+        "entry_type": "breakout",
+        "stop_loss": "atr_1.5",
+        "take_profit": [
+            "r1",
+            "r2"
+        ],
+        "risk_level": "medium"
+    },
+    "strong_uptrend_high_volatility": {
+        "strategy": "supertrend_adx",
+        "leverage": 2,
+        "entry_type": "pullback",
+        "stop_loss": "atr_2.0",
+        "take_profit": [
+            "r1"
+        ],
+        "risk_level": "medium"
+    },
+    "weak_uptrend_low_volatility": {
+        "strategy": "inside_bar",
+        "leverage": 2,
+        "entry_type": "breakout",
+        "stop_loss": "atr_1.0",
+        "take_profit": [
+            "r1",
+            "r2",
+            "r3"
+        ],
+        "risk_level": "low"
+    },
+    "weak_uptrend_high_volatility": {
+        "strategy": "inside_bar",
+        "leverage": 1,
+        "entry_type": "pullback",
+        "stop_loss": "atr_1.5",
+        "take_profit": [
+            "r1"
+        ],
+        "risk_level": "low"
+    },
+    "sideways_low_volatility": {
+        "strategy": "inside_bar",
+        "leverage": 1,
+        "entry_type": "range_bound",
+        "stop_loss": "atr_1.0",
+        "take_profit": [
+            "range_top"
+        ],
+        "risk_level": "low"
+    },
+    "sideways_high_volatility": {
+        "strategy": "inside_bar",
+        "leverage": 1,
+        "entry_type": "range_bound",
+        "stop_loss": "atr_1.0",
+        "take_profit": [
+            "range_top"
+        ],
+        "risk_level": "low"
+    },
+    "strong_downtrend_low_volatility": {
+        "strategy": "supertrend_adx",
+        "leverage": 3,
+        "entry_type": "breakout",
+        "stop_loss": "atr_1.5",
+        "take_profit": [
+            "r1",
+            "r2"
+        ],
+        "risk_level": "medium"
+    },
+    "strong_downtrend_high_volatility": {
+        "strategy": "supertrend_adx",
+        "leverage": 2,
+        "entry_type": "pullback",
+        "stop_loss": "atr_2.0",
+        "take_profit": [
+            "r1"
+        ],
+        "risk_level": "high"
+    },
+    "weak_downtrend_low_volatility": {
+        "strategy": "inside_bar",
+        "leverage": 2,
+        "entry_type": "breakout",
+        "stop_loss": "atr_1.0",
+        "take_profit": [
+            "r1",
+            "r2"
+        ],
+        "risk_level": "low"
+    },
+    "weak_downtrend_high_volatility": {
+        "strategy": "inside_bar",
+        "leverage": 1,
+        "entry_type": "pullback",
+        "stop_loss": "atr_1.5",
+        "take_profit": [
+            "r1"
+        ],
+        "risk_level": "medium"
+    },
+    "unknown": {
+        "strategy": "inside_bar",
+        "leverage": 1,
+        "entry_type": "confirmation",
+        "stop_loss": "atr_1.0",
+        "take_profit": [
+            "r1"
+        ],
+        "risk_level": "low"
+    }
+}
