@@ -141,14 +141,8 @@ class TradingBot:
             health_check.schedule_regular_checks(interval_hours=4)
             logger.info("Scheduled regular health checks every 4 hours")
             
-            # Run an initial health check
-            try:
-                logger.info("Running initial health check")
-                health_results = health_check.run_health_check(notify=False)
-                status = health_results.get('overall_status', 'unknown')
-                logger.info(f"Initial health check complete - status: {status}")
-            except Exception as e:
-                logger.error(f"Failed to run initial health check: {e}", exc_info=True)
+            # Defer initial health check to prevent recursive initialization
+            logger.info("Health check system initialized - initial check will run after startup")
                 
         # Initialize analytics logger if available
         if ANALYTICS_AVAILABLE:

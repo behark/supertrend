@@ -301,12 +301,9 @@ class HealthCheck:
             except (ImportError, NameError):
                 logger.warning("Could not get bot instance from global reference")
                 
-                # Try to get via other means
-                try:
-                    from src.bot import TradingBot
-                    bot_instance = TradingBot()
-                except Exception as e:
-                    logger.error(f"Could not instantiate bot: {str(e)}")
+                # Avoid recursive initialization - skip bot instantiation during health checks
+                logger.warning("Skipping bot instantiation to avoid recursive initialization")
+                bot_instance = None
             
             if bot_instance is None:
                 return {
