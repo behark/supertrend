@@ -1,0 +1,223 @@
+/* Trading Bot Dashboard Styles */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    
+    --strong-uptrend-color: #1e7e34;
+    --weak-uptrend-color: #28a745;
+    --ranging-color: #6c757d;
+    --weak-downtrend-color: #ffc107;
+    --strong-downtrend-color: #dc3545;
+    --high-volatility-color: #9932cc;
+}
+
+body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    padding-bottom: 70px; /* Space for footer */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    line-height: 60px;
+    background-color: #343a40;
+    color: white;
+    z-index: 1000;
+}
+
+/* Status indicator */
+.status-circle {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background-color: #6c757d;
+    transition: background-color 0.3s ease;
+}
+
+.status-circle.connected {
+    background-color: #28a745;
+}
+
+.status-circle.disconnected {
+    background-color: #dc3545;
+}
+
+/* Metric cards */
+.metric-card {
+    border-radius: 0.5rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-left: 5px solid #007bff;
+    transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Parameter sliders */
+.parameter-control {
+    margin-bottom: 1rem;
+}
+
+.parameter-control label {
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+}
+
+.parameter-control label .value-indicator {
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* Profile buttons */
+.profile-button {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+}
+
+.profile-button.active {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(0,123,255,0.5);
+}
+
+/* Trade list */
+.trade-row.profitable {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.trade-row.loss {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+/* Chart containers */
+.chart-container {
+    position: relative;
+    height: 250px;
+    margin-bottom: 1.5rem;
+}
+
+/* Market regime badges */
+.regime-badge {
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    min-width: 120px;
+}
+
+.regime-badge.STRONG_UPTREND {
+    background-color: var(--strong-uptrend-color);
+}
+
+.regime-badge.WEAK_UPTREND {
+    background-color: var(--weak-uptrend-color);
+}
+
+.regime-badge.RANGING {
+    background-color: var(--ranging-color);
+}
+
+.regime-badge.WEAK_DOWNTREND {
+    background-color: var(--weak-downtrend-color);
+    color: #343a40;
+}
+
+.regime-badge.STRONG_DOWNTREND {
+    background-color: var(--strong-downtrend-color);
+}
+
+.regime-badge.HIGH_VOLATILITY {
+    background-color: var(--high-volatility-color);
+}
+
+.regime-badge.UNKNOWN {
+    background-color: var(--secondary-color);
+}
+
+/* Animation */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.pulsing {
+    animation: pulse 1.5s infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .chart-container {
+        height: 200px;
+    }
+    
+    .footer {
+        height: auto;
+    }
+}
+
+/* Card shadow effects */
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Parameter section */
+.parameter-section {
+    border-left: 5px solid #007bff;
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.parameter-name {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.parameter-value {
+    font-size: 1.2rem;
+    color: #007bff;
+}
+
+.parameter-description {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+/* Toast notifications */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+}
