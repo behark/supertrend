@@ -1,0 +1,75 @@
+# Environment variables and sensitive files
+.env
+.env_bybit
+*.env
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+venv_monitor/
+.venv/
+env/
+ENV/
+
+# Log files
+*.log
+*.txt
+bot_service.log
+bot_service_error.log
+crypto_bot.log
+enhanced_bot_log.txt
+final_bot_log.txt
+final_fixed_bot_log.txt
+fixed_timestamp_bot_log.txt
+run_with_bybit.log
+run_with_bybit_new.log
+run_with_bybit_real.log
+premium_signals.log
+forced_signals.log
+trade_planner.log
+
+# Data and model files
+data/
+models/
+backtest_results/
+test_results/
+charts/
+test_charts/
+test_data/
+
+# Process ID files
+*.pid
+
+# Compressed files
+*.zip
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# JSON data files (may contain sensitive trading data)
+*.json
+!package.json
+!requirements.json
+
+# Delivery and temporary directories
+delivery/
+temp/
+tmp/
+
+# Service files (contain system-specific paths)
+*.service
